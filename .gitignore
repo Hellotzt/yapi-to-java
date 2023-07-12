@@ -1,0 +1,10 @@
+logs/
+/target/
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+# system ignore
+.DS_Store
+Thumbs.db
