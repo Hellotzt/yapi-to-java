@@ -1,4 +1,4 @@
-package com.codeLife.yapiToJava.constnt;
+package com.codeLife.yapiToJava.common.constnt;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,6 +9,7 @@ import java.util.List;
  * @author Hellotzt
  */
 public class ParamConstant {
+    public static final String OPTIONS = "OPTIONS";
     public static final String DTO = "Dto";
     public static final String VO = "Vo";
     public static final String COOKIE = "Cookie";

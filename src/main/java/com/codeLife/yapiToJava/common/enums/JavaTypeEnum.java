@@ -1,4 +1,4 @@
-package com.codeLife.yapiToJava.enums;
+package com.codeLife.yapiToJava.common.enums;
 
 /**
  * 类型枚举映射
