@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Yapi To Java</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+</head>
+<body>
+
+<form>
+    <br>
+    <h2 style="text-align: center;">Welcome Yapi To Java</h2>
+    <br>
+    <div class="mb-3">
+        <div class="row g-2">
+
+
+            <div class="col-md">
+                <div class="form-floating">
+                    <input type="email" class="form-control" id="yapiUrlByInput" placeholder="name@example.com">
+                    <label for="yapiUrlByInput">Yapi接口路径：</label>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="form-floating">
+                    <input type="email" class="form-control" id="cookieByInput" placeholder="name@example.com">
+                    <label for="cookieByInput">Cookie：</label>
+                </div>
+            </div>
+            <button type="button" class="btn btn-outline-primary" onclick="requestData()">请求</button>
+        </div>
+
+
+        <br>
+        <br>
+        <div class="container px-4 text-center">
+            <div class="row gx-5">
+                <div class="col">
+                    <div class="card">
+                        <h5 class="card-header">入参：</h5>
+                        <div class="card-body">
+                            <pre>
+                            <code class="java" id="reqCode" style="height: 100%; text-align: left;">
+                            </code>
+                        </pre>
+                            <a href="#" class="btn btn-outline-primary">复制</a>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col">
+                    <div class="card">
+                        <h5 class="card-header">出参：</h5>
+                        <pre>
+                            <code class="java" id="respCode" style="height: 100%; text-align: left;">
+                            </code>
+                        </pre>
+
+                        <div class="card-body">
+                            <a href="#" class="btn btn-outline-primary">复制</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</form>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/highlight.min.js"></script>
+
+<script>
+
+    // 在页面加载完成后调用方法展示缓存的数据
+    window.onload = function () {
+        // 从缓存中获取cookie的值
+        const storedCookie = window.localStorage.getItem("cookieByInput");
+        if (storedCookie) {
+            document.getElementById("cookieByInput").value = storedCookie;
+        }
+    };
+    document.addEventListener('tzt', (event) => {
+
+    });
+
+    function requestData() {
+        let apiUrl = "http://localhost:8080/toJavaObject";
+        const yapiUrlByInput = document.getElementById("yapiUrlByInput").value;
+        if (yapiUrlByInput == null || yapiUrlByInput === "" || yapiUrlByInput.indexOf("http") === -1) {
+            alert("请输入Yapi接口路径");
+            return;
+        }
+        const cookieByInput = document.getElementById("cookieByInput").value;
+        if (cookieByInput == null || cookieByInput === "") {
+            alert("请输入cookie🍪");
+            return;
+        }
+        // cookieByInput放到缓存中
+        window.localStorage.setItem("cookieByInput", cookieByInput);
+
+        let xhr = new XMLHttpRequest();
+        xhr.open("Post", apiUrl, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        let sendValue = JSON.stringify({
+            "apiUrl": yapiUrlByInput,
+            "cookie": cookieByInput
+        });
+
+        xhr.onreadystatechange = function () {
+            console.log(xhr.readyState);
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    let parse = JSON.parse(xhr.responseText);
+                    console.log(parse);
+                    document.getElementById("reqCode").innerHTML = parse.data.requestJavaObject;
+                    let innerHTML = parse.data.responseJavaObject;
+                    let test = "";
+                    innerHTML.forEach((item, index) => {
+                        test =test+ item + "\n";
+                    });
+                    document.getElementById("respCode").innerHTML = test;
+                    document.querySelectorAll('pre code').forEach((el) => {
+                        hljs.highlightElement(el);
+                    });
+                }
+            }
+        }
+        xhr.send(sendValue);
+
+    }
+
+
+</script>
+</body>
+
+</html>

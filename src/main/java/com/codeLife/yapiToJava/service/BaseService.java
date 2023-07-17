@@ -7,8 +7,12 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.codeLife.yapiToJava.common.constnt.ParamConstant;
 import com.codeLife.yapiToJava.common.enums.JavaTypeEnum;
+import com.codeLife.yapiToJava.common.exception.CustomException;
+import com.codeLife.yapiToJava.common.param.CodeMsg;
+import com.codeLife.yapiToJava.common.param.Result;
 import com.codeLife.yapiToJava.common.util.BaseUtil;
 import com.codeLife.yapiToJava.entity.req.BaseReq;
+import com.codeLife.yapiToJava.entity.resp.BaseResp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,39 +30,43 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BaseService {
 
-    public String toJavaObject(BaseReq baseReq) {
+    public Result<BaseResp> toJavaObject(BaseReq baseReq) {
         String requestUrl = BaseUtil.getDomain(baseReq.getApiUrl()) + "/api/interface/get?id=" + BaseUtil.getUrlId(baseReq.getApiUrl());
         String result = HttpRequest.get(requestUrl)
                 .header(ParamConstant.COOKIE, baseReq.getCookie())
                 .execute().body();
         JSONObject jsonObject = JSON.parseObject(result);
         if (!jsonObject.get("errcode").equals(0)){
-            return jsonObject.getString("errmsg");
+            throw new CustomException(new CodeMsg("50000",jsonObject.getString("errmsg"))) ;
         }
         JSONObject jsonData = jsonObject.getJSONObject(ParamConstant.DATA);
         System.out.println(jsonData);
         System.out.println("-----");
-        String req = requestParamToJava(jsonData);
-        String resp = responseParamToJava(jsonData);
-        return req + resp;
+        List<String> reqList = requestParamToJava(jsonData);
+        List<String> respList = responseParamToJava(jsonData);
+        BaseResp baseResp = new BaseResp();
+        baseResp.setRequestJavaObject(reqList);
+        baseResp.setResponseJavaObject(respList);
+        return Result.success(baseResp);
     }
 
-    private static String responseParamToJava(JSONObject jsonData) {
+    private static List<String> responseParamToJava(JSONObject jsonData) {
         System.out.println("以下为返回参数所对应的java实体类----------------");
         String apiPathMethodName = BaseUtil.getApiPathMethod(jsonData);
         JSONObject reqBodyOther = jsonData.getJSONObject("res_body");
         // System.out.println(reqBodyOther);
         // System.out.println("-----");
         String classDescription = jsonData.getString(ParamConstant.TITLE);
-        List<StringBuilder> subClassList = new ArrayList<>();
-        StringBuilder aClass = buildClass(classDescription, apiPathMethodName, reqBodyOther,ParamConstant.VO,subClassList);
+        List<String> subClassList = new ArrayList<>();
+        String aClass = buildClass(classDescription, apiPathMethodName, reqBodyOther,ParamConstant.VO,subClassList);
         System.out.println(aClass);
-
-        System.out.println("下面是参数接收对象：-------------------" );
-        for (StringBuilder str : subClassList) {
-            aClass.append("\n").append(str);
-        }
-        return aClass.toString();
+        subClassList.add(0,aClass);
+        return subClassList;
+        // System.out.println("下面是参数接收对象：-------------------" );
+        // for (StringBuilder str : subClassList) {
+        //     aClass.append("\n").append(str);
+        // }
+        // return aClass.toString();
     }
 
     /**
@@ -66,23 +74,25 @@ public class BaseService {
      *
      * @param jsonData json数据
      */
-    private static String requestParamToJava(JSONObject jsonData) {
+    private static List<String> requestParamToJava(JSONObject jsonData) {
         System.out.println("以下为请求参数所对应的java实体类----------------");
         String apiPathMethodName = BaseUtil.getApiPathMethod(jsonData);
         JSONObject reqBodyOther = jsonData.getJSONObject("req_body_other");
         String classDescription = jsonData.getString(ParamConstant.TITLE);
-        List<StringBuilder> subClassList = new ArrayList<>();
-        StringBuilder aClass = buildClass(classDescription, apiPathMethodName, reqBodyOther, ParamConstant.DTO, subClassList);
+        List<String> subClassList = new ArrayList<>();
+        String aClass = buildClass(classDescription, apiPathMethodName, reqBodyOther, ParamConstant.DTO, subClassList);
         System.out.println(aClass);
-
-        System.out.println("下面是参数接收对象：-------------------" );
-        for (StringBuilder str : subClassList) {
-            aClass.append("\n").append(str);
-        }
-        return aClass.toString();
+        subClassList.add(0,aClass);
+        return subClassList;
+        // System.out.println("下面是参数接收对象：-------------------" );
+        // for (StringBuilder str : subClassList) {
+        //     aClass.append("\n").append(str);
+        // }
+        // return aClass.toString();
     }
 
-    private static StringBuilder buildClass(String classDescription, String apiPathMethodName, JSONObject reqBodyOther,String paramType,List<StringBuilder> subClassList) {
+    private static String buildClass(String classDescription, String apiPathMethodName, JSONObject reqBodyOther,
+                                            String paramType,List<String> subClassList) {
         JSONArray requiredArray = reqBodyOther.getJSONArray("required");
         JSONObject properties;
         if (JavaTypeEnum.Array.getYapi().equals(reqBodyOther.getString("type"))){
@@ -92,7 +102,7 @@ public class BaseService {
             properties = reqBodyOther.getJSONObject("properties");
         }
 
-        StringBuilder subclass;
+        String subclass;
         StringBuilder classValue = new StringBuilder();
         classValue.append("/**\n").append("* ").append(classDescription).append(paramType).append("\n*/\n");
         classValue.append(ParamConstant.CLASS).append(apiPathMethodName).append(paramType).append("{\n");
@@ -165,7 +175,7 @@ public class BaseService {
             }
             classValue.append(" ").append(key).append(";\n");
         }
-        return classValue.append("}");
+        return classValue.append("}").toString();
 
     }
 
