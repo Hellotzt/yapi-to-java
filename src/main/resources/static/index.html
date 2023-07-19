@@ -4,8 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Yapi To Java</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/5.1.3/css/bootstrap.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/default.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/highlight.min.js"></script>
 </head>
 <body>
 
@@ -13,64 +14,34 @@
     <br>
     <h2 style="text-align: center;">Welcome Yapi To Java</h2>
     <br>
-    <div class="mb-3">
+    <div class="mb-3" style="width: 80%; margin-left: auto; margin-right: auto;">
         <div class="row g-2">
-
-
             <div class="col-md">
-                <div class="form-floating">
-                    <input type="email" class="form-control" id="yapiUrlByInput" placeholder="name@example.com">
+                <div class="form-floating mb-3">
+                    <input type="email" class="form-control" id="yapiUrlByInput">
                     <label for="yapiUrlByInput">Yapi接口路径：</label>
                 </div>
             </div>
             <div class="col-md">
-                <div class="form-floating">
-                    <input type="email" class="form-control" id="cookieByInput" placeholder="name@example.com">
+                <div class="form-floating mb-3">
+                    <input type="email" class="form-control" id="cookieByInput">
                     <label for="cookieByInput">Cookie：</label>
                 </div>
             </div>
             <button type="button" class="btn btn-outline-primary" onclick="requestData()">请求</button>
         </div>
-
-
         <br>
         <br>
-        <div class="container px-4 text-center">
-            <div class="row gx-5">
-                <div class="col">
-                    <div class="card">
-                        <h5 class="card-header">入参：</h5>
-                        <div class="card-body">
-                            <pre>
-                            <code class="java" id="reqCode" style="height: 100%; text-align: left;">
-                            </code>
-                        </pre>
-                            <a href="#" class="btn btn-outline-primary">复制</a>
-                        </div>
-                    </div>
-                </div>
-
-
-                <div class="col">
-                    <div class="card">
-                        <h5 class="card-header">出参：</h5>
-                        <pre>
-                            <code class="java" id="respCode" style="height: 100%; text-align: left;">
-                            </code>
-                        </pre>
-
-                        <div class="card-body">
-                            <a href="#" class="btn btn-outline-primary">复制</a>
-                        </div>
-                    </div>
-                </div>
-
+        <div class="row g-2">
+            <div class="col">
+                <div id="reqCodeBox"></div>
+            </div>
+            <div class="col">
+                <div id="respCodeBox"></div>
             </div>
         </div>
     </div>
 </form>
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/default.min.css">
-<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/highlight.min.js"></script>
 
 <script>
 
@@ -82,12 +53,61 @@
             document.getElementById("cookieByInput").value = storedCookie;
         }
     };
-    document.addEventListener('tzt', (event) => {
+    let respCode = [];
+    let reqCode = [];
+    const buildDom = (index, title) => ` <div class="col" data-index=${index}>
+                    <div class="card">
+                        <h5 class="card-header">${title}</h5>
+                            <div class="code java ${title}"  style="height: 100%; "></div>
+                        <button type="button" class="btn btn-outline-primary" onclick="copy(${index},'${title}')">
+                            复制
+                        </button>
+                    </div>
+                </div>`
+    const copy = async (index, title) => {
+        // console.log(index + title);
+        // let clickValue;
+        // if ("request" === title) {
+        //     clickValue = reqCode[index];
+        // } else {
+        //     clickValue = respCode[index];
+        // }
+        // console.log(clickValue);
+        //
+        // try {
+        //     await navigator.clipboard.writeText(clickValue);
+        //     alert("复制成功");
+        // } catch (err) {
+        //     console.error("复制失败:", err);
+        //     alert("复制失败");
+        // }
+        // 上面api需要在上下文安全的环境才能支持 待解决
+        console.log(index + title);
+        let clickValue;
+        if ("request" === title) {
+            clickValue = reqCode[index];
+        } else {
+            clickValue = respCode[index];
+        }
+        console.log(clickValue);
 
-    });
+        // 创建新的 textarea 元素
+        const textarea = document.createElement("textarea");
+        // 设置 textarea 的值为要复制的文本内容
+        textarea.value = clickValue;
+        // 将 textarea 添加到页面中
+        document.body.appendChild(textarea);
+        // 选择 textarea 中的文本
+        textarea.select();
+        // 复制文本到剪贴板
+        document.execCommand("copy");
+        // 移除 textarea 元素
+        document.body.removeChild(textarea);
+        alert("复制成功");
+    }
 
     function requestData() {
-        let apiUrl = "http://localhost:8080/toJavaObject";
+        let apiUrl = "http://192.168.3.98:8080/toJavaObject";
         const yapiUrlByInput = document.getElementById("yapiUrlByInput").value;
         if (yapiUrlByInput == null || yapiUrlByInput === "" || yapiUrlByInput.indexOf("http") === -1) {
             alert("请输入Yapi接口路径");
@@ -113,16 +133,30 @@
             console.log(xhr.readyState);
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    let parse = JSON.parse(xhr.responseText);
-                    console.log(parse);
-                    document.getElementById("reqCode").innerHTML = parse.data.requestJavaObject;
-                    let innerHTML = parse.data.responseJavaObject;
-                    let test = "";
-                    innerHTML.forEach((item, index) => {
-                        test =test+ item + "\n";
+                    let result = JSON.parse(xhr.responseText);
+                    if (result.code !== "000000") {
+                        document.getElementById("reqCodeBox").innerHTML = "";
+                        document.getElementById("respCodeBox").innerHTML = "";
+                        return alert(result.msg);
+                    }
+                    reqCode = result.data.requestJavaObject;
+                    respCode = result.data.responseJavaObject;
+                    let reqStrArr = reqCode.map((code, i) => buildDom(i, "request"));
+                    document.getElementById("reqCodeBox").innerHTML = reqStrArr.join('<br>');
+
+                    let respStrArr = respCode.map((code, i) => buildDom(i, "response"));
+                    document.getElementById("respCodeBox").innerHTML = respStrArr.join('<br>');
+
+                    const requestElements = document.querySelectorAll('.request');
+                    requestElements.forEach((req, index) => {
+                        req.innerHTML = reqCode[index].replace("<", "&lt;").replace(">", "&gt;");
                     });
-                    document.getElementById("respCode").innerHTML = test;
-                    document.querySelectorAll('pre code').forEach((el) => {
+
+                    const responseElements = document.querySelectorAll('.response');
+                    responseElements.forEach((resp, index) => {
+                        resp.innerHTML = respCode[index].replace("<", "&lt;").replace(">", "&gt;");
+                    });
+                    document.querySelectorAll('div.code').forEach((el) => {
                         hljs.highlightElement(el);
                     });
                 }
@@ -135,5 +169,9 @@
 
 </script>
 </body>
-
+<style>
+    div.code {
+        white-space: pre;
+    }
+</style>
 </html>
