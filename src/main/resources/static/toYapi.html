@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/5.1.3/css/bootstrap.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/default.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/highlight.min.js"></script>
+    <link rel="Bookmark" type="image/x-icon" href="/coffee.svg" />
+    <link rel="icon" type="image/x-icon" href="/coffee.svg"  />
+    <link rel="shortcut icon" type="image/x-icon" href="/coffee.svg"  />
+</head>
+<body>
+<form>
+    <br>
+    <h2 style="text-align: center;">Welcome Java To Yapi</h2>
+    <br>
+    <button type="button" class="btn btn-primary" onclick="goToYapi()"
+            style="position: absolute; top: 5px; right: 5px;">去转Jvav
+    </button>
+    <div class="mb-3" style="width: 80%; margin-left: auto; margin-right: auto;">
+        <div class="mb-3">
+            <div class="row g-2">
+                <label for="classTextArea" class="form-label">请复制完整的class文件:</label>
+<!--                <pre>-->
+<!--                    <code class="language-java">-->
+                        <textarea class="form-control language-java" id="classTextArea" rows="10" onchange="textAreaChange()"></textarea>
+<!--                    </code>-->
+<!--                </pre>-->
+
+                <button type="button" class="btn btn-outline-primary" onclick="requestData()">转换</button>
+
+                <br>
+                <div class="row g-2">
+                    <div class="col">
+                        <div id="reqCodeBox"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+</body>
+<script>
+    let reqCode = "";
+    function goToYapi() {
+        window.location.href = "index.html";
+    }
+    function textAreaChange() {
+        const classTextArea = document.getElementById("classTextArea").value;
+        // alert(classTextArea)
+        document.querySelectorAll('textarea.form-control').forEach((el) => {
+            hljs.highlightElement(el);
+        });
+    }
+
+    function requestData() {
+        let apiUrl = "http://192.168.3.108:8070/toApiObject";
+        // let apiUrl = "http://124.223.57.171:8070/toApiObject";
+        const classTextArea = document.getElementById("classTextArea").value;
+        if (classTextArea === '' || classTextArea.trim() === ''){
+            alert("请输入class文件信息");
+            return;
+        }
+        console.log("666:"+classTextArea)
+        let xhr = new XMLHttpRequest();
+        xhr.open("Post", apiUrl, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        let sendValue = JSON.stringify({
+            "classText": classTextArea
+        });
+
+        xhr.onreadystatechange = function () {
+            console.log(xhr.readyState);
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    let result = JSON.parse(xhr.responseText);
+                    if (result.code !== "000000") {
+                        document.getElementById("reqCodeBox").innerHTML = "";
+                        return alert(result.msg);
+                    }
+                    reqCode = JSON.stringify(JSON.parse(result.data),null,4)
+                    document.getElementById("reqCodeBox").innerHTML = buildDom(1, "request");
+
+                    const requestElements = document.querySelectorAll('.request');
+                    requestElements.forEach((req, index) => {
+                        req.innerHTML = reqCode.replace("<", "&lt;").replace(">", "&gt;");
+                    });
+
+                    document.querySelectorAll('div.code').forEach((el) => {
+                        hljs.highlightElement(el);
+                    });
+                }
+            }
+        }
+        xhr.send(sendValue);
+
+    }
+    const buildDom = (index, title) => ` <div class="col" data-index=${index}>
+                    <div class="card">
+                        <h5 class="card-header">Yapi所需JSON格式</h5>
+                        <pre>
+                            <div class="code java ${title}"  style="height: 100%; "></div>
+                        </pre>
+                        <button type="button" class="btn btn-outline-primary" onclick="copy(${index},'${title}')">
+                            复制
+                        </button>
+                    </div>
+                </div>`;
+    const copy = async (index, title) => {
+        console.log(index + title);
+        let clickValue;
+        if ("request" === title) {
+            clickValue = reqCode;
+        }
+        console.log(clickValue);
+
+        // 创建新的 textarea 元素
+        const textarea = document.createElement("textarea");
+        // 设置 textarea 的值为要复制的文本内容
+        textarea.value = clickValue;
+        // 将 textarea 添加到页面中
+        document.body.appendChild(textarea);
+        // 选择 textarea 中的文本
+        textarea.select();
+        // 复制文本到剪贴板
+        document.execCommand("copy");
+        // 移除 textarea 元素
+        document.body.removeChild(textarea);
+        alert("复制成功");
+    }
+</script>
+</html>

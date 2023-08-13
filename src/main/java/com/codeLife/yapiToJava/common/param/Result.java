@@ -1,6 +1,9 @@
 package com.codeLife.yapiToJava.common.param;
 
+import cn.hutool.core.date.DateUtil;
 import lombok.Data;
+
+import java.util.Date;
 
 /**
  * 通用返回结果封装
@@ -55,14 +58,14 @@ public class Result<T> {
 	public Result() {
 		this.code = CodeMsg.SUCCESS.getCode();
 		this.msg = CodeMsg.SUCCESS.getMsg();
-		this.timestamp = CodeMsg.SUCCESS.getTimestamp();
+		this.timestamp = DateUtil.format(new Date(), "yyyyMMddHHmmss");
 		this.data = null;
 	}
 	
 	public Result(T data) {
 		this.code = CodeMsg.SUCCESS.getCode();
 		this.msg = CodeMsg.SUCCESS.getMsg();
-		this.timestamp = CodeMsg.SUCCESS.getTimestamp();
+		this.timestamp = DateUtil.format(new Date(), "yyyyMMddHHmmss");
 
 		this.data = data;
 	}
@@ -71,7 +74,7 @@ public class Result<T> {
 		if(codeMsg != null) {
 			this.code = codeMsg.getCode();
 			this.msg = codeMsg.getMsg();
-			this.timestamp = codeMsg.getTimestamp();
+			this.timestamp = DateUtil.format(new Date(), "yyyyMMddHHmmss");
 		}
 	}
 	

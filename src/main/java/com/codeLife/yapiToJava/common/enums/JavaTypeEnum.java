@@ -6,13 +6,13 @@ package com.codeLife.yapiToJava.common.enums;
  * @author Hellotzt
  */
 public enum JavaTypeEnum {
-    String("string","String","@NotBlank"),
-    Number("number","Integer","@NotNull"),
-    Array("array","List","@NotEmpty"),
-    Object("object","Object","@Valid"),
-    Boolean("boolean","boolean","@NotNull"),
-    Integer("integer","Integer","@NotNull"),
-    Null("null","String","@NotBlank"),
+    String("string","String","@NotBlank","import javax.validation.constraints.NotBlank;\n"),
+    Number("number","Integer","@NotNull","import javax.validation.constraints.NotNull;\n"),
+    Array("array","List","@NotEmpty","import javax.validation.constraints.NotEmpty;\n"),
+    Object("object","Object","@Valid","import javax.validation.Valid;\n"),
+    Boolean("boolean","boolean","@NotNull","import javax.validation.constraints.NotNull;\n"),
+    Integer("integer","Integer","@NotNull","import javax.validation.constraints.NotNull;\n"),
+    Null("null","String","@NotBlank","import javax.validation.constraints.NotBlank;\n"),
     ;
     /**
      * yapi类型
@@ -26,11 +26,16 @@ public enum JavaTypeEnum {
      * 必填校验注解
      */
     private final String verify;
+    /**
+     * 必填校验导包语句
+     */
+    private final String importStr;
 
-    JavaTypeEnum(String yapi, String java, String verify) {
+    JavaTypeEnum(String yapi, String java, String verify,String importStr) {
         this.yapi = yapi;
         this.java = java;
         this.verify = verify;
+        this.importStr = importStr;
     }
 
     public java.lang.String getYapi() {
@@ -43,6 +48,24 @@ public enum JavaTypeEnum {
 
     public java.lang.String getVerify() {
         return verify;
+    }
+
+    public java.lang.String getImportStr() {
+        return importStr;
+    }
+
+    /**
+     * 获取yapi类型
+     * @param javaType javaType类型
+     * @return yapi类型
+     */
+    public static String typeToYapi(String javaType){
+        for (JavaTypeEnum javaTypeEnum : JavaTypeEnum.values()) {
+            if(javaTypeEnum.getJava().equals(javaType)){
+                return javaTypeEnum.getYapi();
+            }
+        }
+        return Object.getYapi();
     }
 
     /**
@@ -68,6 +91,20 @@ public enum JavaTypeEnum {
         for (JavaTypeEnum javaTypeEnum : JavaTypeEnum.values()) {
             if(javaTypeEnum.getYapi().equals(yapi)){
                 return javaTypeEnum.getVerify();
+            }
+        }
+        return "";
+    }
+
+    /**
+     * 获取必填校验导包语句
+     * @param yapi yapi类型
+     * @return 必填校验导包语句
+     */
+    public static String typeToImportStr(String yapi){
+        for (JavaTypeEnum javaTypeEnum : JavaTypeEnum.values()) {
+            if(javaTypeEnum.getYapi().equals(yapi)){
+                return javaTypeEnum.getImportStr();
             }
         }
         return "";
