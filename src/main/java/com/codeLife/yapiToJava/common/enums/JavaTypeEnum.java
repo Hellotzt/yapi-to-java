@@ -7,7 +7,7 @@ package com.codeLife.yapiToJava.common.enums;
  */
 public enum JavaTypeEnum {
     String("string","String","@NotBlank","import javax.validation.constraints.NotBlank;\n"),
-    Number("number","Integer","@NotNull","import javax.validation.constraints.NotNull;\n"),
+    Number("number","int","@NotNull","import javax.validation.constraints.NotNull;\n"),
     Array("array","List","@NotEmpty","import javax.validation.constraints.NotEmpty;\n"),
     Object("object","Object","@Valid","import javax.validation.Valid;\n"),
     Boolean("boolean","boolean","@NotNull","import javax.validation.constraints.NotNull;\n"),
