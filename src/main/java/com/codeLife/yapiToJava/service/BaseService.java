@@ -1,5 +1,6 @@
 package com.codeLife.yapiToJava.service;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson2.JSON;
@@ -87,6 +88,9 @@ public class BaseService {
 
     private static String buildClass(String classDescription, String apiPathMethodName, JSONObject reqBodyOther,
                                      String paramType, List<String> subClassList) {
+        if (ObjectUtil.isNull(reqBodyOther)){
+            return CodeMsg.CONTEXT_MISS.getMsg();
+        }
         JSONArray requiredArray = reqBodyOther.getJSONArray(ParamConstant.REQUIRED);
         JSONObject properties;
         if (JavaTypeEnum.Array.getYapi().equals(reqBodyOther.getString(ParamConstant.TYPE))) {
